@@ -3,7 +3,7 @@
 // process.stdin
 //   .pipe(process.stdout);
 
-import { Readable } from 'node:stream';
+import { Readable, Writable } from 'node:stream';
 
 class oneToHundredStream extends Readable {
   index = 1;
@@ -11,14 +11,23 @@ class oneToHundredStream extends Readable {
   _read() {
     const i = this.index++;
 
-    if (i > 100) {
-      this.push(null)
-    } else {
-      const buf = Buffer.from(String(i))
-
-      this.push(buf);
-    }
+    setTimeout(() => {
+      if (i > 100) {
+        this.push(null)
+      } else {
+        const buf = Buffer.from(String(i))
+  
+        this.push(buf);
+      }
+    }, 300);
   }
 }
 
-new oneToHundredStream().pipe(process.stdout);
+class MultiplyByTenStream extends Writable  {
+  _write(chunk, encoding, callback) {
+    console.log(+chunk.toString() * 10);
+    callback();
+  }
+}
+
+new oneToHundredStream().pipe(new MultiplyByTenStream());
