@@ -4,9 +4,10 @@ import { buildRoutePath } from '../utils/build-route-path.js';
 
 const database = new Database();
 
-const requiredMessage = JSON.stringify({
-  error: 'Title and description are required.'
-});
+const errorMessages = {
+  requiredFields: 'Title and description are required.',
+  taskNotFound: 'Task id not found.'
+}
 
 const tasksRoutes = [{
     method: 'GET',
@@ -22,7 +23,9 @@ const tasksRoutes = [{
     path: buildRoutePath('/tasks'),
     handler: (req, res) => {
       if (!req?.body?.title || !req?.body?.description) {
-        return res.writeHead(400).end(requiredMessage);
+        return res.writeHead(400).end(JSON.stringify({
+          error: errorMessages.requiredFields
+        }));
       }
       
       const {
@@ -53,7 +56,13 @@ const tasksRoutes = [{
         id
       } = req.params;
 
-      database.delete('tasks', id);
+      try {
+        database.delete('tasks', id);
+      } catch(err) {
+        return res.writeHead(404).end(JSON.stringify({
+          error: errorMessages.taskNotFound
+        }));
+      }
 
       return res.writeHead(204).end();
     }
@@ -63,7 +72,9 @@ const tasksRoutes = [{
     path: buildRoutePath('/tasks/:id'),
     handler: (req, res) => {
       if (!req?.body?.title || !req?.body?.description) {
-        return res.writeHead(400).end(requiredMessage);
+        return res.writeHead(400).end(JSON.stringify({
+          error: errorMessages.requiredFields
+        }));
       }
 
       const {
@@ -75,11 +86,17 @@ const tasksRoutes = [{
         description,
       } = req.body;
 
-      database.update('tasks', id, {
-        title,
-        description,
-        updated_at: new Date(),
-      });
+      try {
+        database.update('tasks', id, {
+          title,
+          description,
+          updated_at: new Date(),
+        });
+      } catch (error) {
+        return res.writeHead(404).end(JSON.stringify({
+          error: errorMessages.taskNotFound
+        }));
+      }
 
       return res.writeHead(204).end();
     }
@@ -93,9 +110,16 @@ const tasksRoutes = [{
       } = req.params;
 
 
-      database.update('tasks', id, {
-        completed_at: new Date(),
-      });
+
+      try {
+        database.update('tasks', id, {
+          completed_at: new Date(),
+        });
+      } catch (err) {
+        return res.writeHead(404).end(JSON.stringify({
+          error: errorMessages.taskNotFound
+        }));
+      }
 
       return res.writeHead(204).end();
     }
