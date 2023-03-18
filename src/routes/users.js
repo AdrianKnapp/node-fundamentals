@@ -1,15 +1,16 @@
 import { randomUUID } from 'crypto';
-import { Database } from "./db/database.js";
-import { buildRoutePath } from './utils/build-route-path.js';
+import { Database } from "../db/database.js";
+import { buildRoutePath } from '../utils/build-route-path.js';
 
 const database = new Database();
 
-export const routes = [
-  {
+const usersRoutes = [{
     method: 'GET',
     path: buildRoutePath('/users'),
     handler: (req, res) => {
-      const { search } = req.query;
+      const {
+        search
+      } = req.query;
 
       const users = database.select('users', search ? {
         name: search,
@@ -23,7 +24,10 @@ export const routes = [
     method: 'POST',
     path: buildRoutePath('/users'),
     handler: (req, res) => {
-      const { name, email } = req.body;
+      const {
+        name,
+        email
+      } = req.body;
 
       const user = {
         id: randomUUID(),
@@ -40,7 +44,9 @@ export const routes = [
     method: 'DELETE',
     path: buildRoutePath('/users/:id'),
     handler: (req, res) => {
-      const { id } = req.params;
+      const {
+        id
+      } = req.params;
 
       database.delete('users', id);
 
@@ -51,8 +57,13 @@ export const routes = [
     method: 'PUT',
     path: buildRoutePath('/users/:id'),
     handler: (req, res) => {
-      const { id } = req.params;
-      const { name, email } = req.body;
+      const {
+        id
+      } = req.params;
+      const {
+        name,
+        email
+      } = req.body;
 
       database.update('users', id, {
         name,
@@ -62,4 +73,6 @@ export const routes = [
       return res.writeHead(204).end();
     }
   }
-]
+];
+
+export default usersRoutes;
