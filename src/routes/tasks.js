@@ -4,6 +4,10 @@ import { buildRoutePath } from '../utils/build-route-path.js';
 
 const database = new Database();
 
+const requiredMessage = JSON.stringify({
+  error: 'Title and description are required.'
+});
+
 const tasksRoutes = [{
     method: 'GET',
     path: buildRoutePath('/tasks'),
@@ -17,11 +21,16 @@ const tasksRoutes = [{
     method: 'POST',
     path: buildRoutePath('/tasks'),
     handler: (req, res) => {
+      if (!req?.body?.title || !req?.body?.description) {
+        return res.writeHead(400).end(requiredMessage);
+      }
+      
       const {
         title,
         description
       } = req.body;
 
+      
       const task = {
         id: randomUUID(),
         title,
@@ -53,9 +62,14 @@ const tasksRoutes = [{
     method: 'PUT',
     path: buildRoutePath('/tasks/:id'),
     handler: (req, res) => {
+      if (!req?.body?.title || !req?.body?.description) {
+        return res.writeHead(400).end(requiredMessage);
+      }
+
       const {
         id
       } = req.params;
+      
       const {
         title,
         description,
